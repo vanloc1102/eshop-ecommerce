@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport"
 	content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-<title>Eshop Admin Dashboard</title>
+<title>[[${pageTitle}]]</title>
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet"
 	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
@@ -18,7 +18,7 @@
 <body>
 	<div class="header">
 		<nav class="navbar navbar-expand-lg navbar-light bg-light">
-			<a class="navbar-brand" href="#">ESHOP</a>
+			<a class="navbar-brand" th:href="@{/}">ESHOP</a>
 			<button class="navbar-toggler" type="button" data-toggle="collapse"
 				data-target="#navbarTogglerDemo02"
 				aria-controls="navbarTogglerDemo02" aria-expanded="false"
@@ -28,8 +28,8 @@
 
 			<div class="collapse navbar-collapse" id="navbarTogglerDemo02">
 				<ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-					<li class="nav-item active"><a class="nav-link" href="@{/}">Home
-							<span class="sr-only">(current)</span>
+					<li class="nav-item active"><a class="nav-link"
+						th:href="@{/users}">Users <span class="sr-only">(current)</span>
 					</a></li>
 					<li class="nav-item"><a class="nav-link"
 						th:href="@{/categories}">Categories</a></li>
@@ -54,14 +54,16 @@
 	</div>
 	<div class="main container mt-5">
 		<div class="text-center">
-			<h2>Manage Users | Create New User</h2>
+			<h2>Manage Users | [[${pageTitle}]]</h2>
 		</div>
 		<form th:action="@{/users/save}" method="post"
-			style="max-width: 700px; margin: 0 auto;" th:object="${user}">
+			style="max-width: 700px; margin: 0 auto;" th:object="${user}"
+			onsubmit="return checkEmailUnique(this)">
+			<input type="hidden" th:field="*{id}" />
 			<div class="form-group row mt-5">
 				<label for="inputEmail" class="col-sm-2 col-form-label">Email</label>
 				<div class="col-sm-10">
-					<input type="email" class="form-control" id="inputEmail"
+					<input type="email" class="form-control" id="email"
 						placeholder="Email" th:field="*{email}" required="required"
 						minlength="8" maxlength="128">
 				</div>
@@ -70,7 +72,7 @@
 				<label for="inputFirstName" class="col-sm-2 col-form-label">First
 					Name</label>
 				<div class="col-sm-10">
-					<input type="text" class="form-control" id="inputFirstName"
+					<input type="text" class="form-control" id="firstName"
 						placeholder="First name" th:field="*{firstName}"
 						required="required" minlength="2" maxlength="45">
 				</div>
@@ -79,7 +81,7 @@
 				<label for="inputLastName" class="col-sm-2 col-form-label">Last
 					Name</label>
 				<div class="col-sm-10">
-					<input type="text" class="form-control" id="inputLastName"
+					<input type="text" class="form-control" id="lastName"
 						placeholder="Last name" th:field="*{lastName}" required="required"
 						minlength="2" maxlength="45">
 				</div>
@@ -87,9 +89,13 @@
 			<div class="form-group row">
 				<label for="inputPassword" class="col-sm-2 col-form-label">Password</label>
 				<div class="col-sm-10">
-					<input type="password" class="form-control" id="inputPassword"
+					<input th:if="${user.id == null}" type="password" class="form-control" id="password"
 						placeholder="Password" th:field="*{password}" required="required"
 						minlength="8" maxlength="45">
+					<input th:if="${user.id != null}" type="password"
+						class="form-control" id="password" placeholder="Password"
+						th:field="*{password}" minlength="8"
+						maxlength="45">
 				</div>
 			</div>
 			<fieldset class="form-group">
@@ -129,7 +135,27 @@
 				</div>
 			</div>
 		</form>
+
+		<div class="modal" id="modalDialog">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="modalTitle"></h5>
+						<button type="button" class="close" data-dismiss="modal">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<span id="modalBody"></span>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
+
 	<div class="text-center">
 		<p>Eshop Control Pannel - Copyright &copy; Eshop</p>
 	</div>
@@ -139,6 +165,44 @@
 				window.location = "[[@{/users}]]"
 			})
 		});
+
+		function checkEmailUnique(form) {
+			url = "[[@{/users/check_email_unique}]]";
+			userEmail = $("#email").val();
+			userId = $("#id").val();
+			csrfValue = $("input[name='_csrf']").val();
+			params = {
+				id : userId,
+				email : userEmail,
+				_csrf : csrfValue
+			};
+
+			$.post(
+					url,
+					params,
+					function(response) {
+						if (response == "OK") {
+							form.submit();
+						} else if (response == "Duplicated") {
+							showModalDialog("Warning",
+									"There is another user having the email : "
+											+ userEmail);
+						} else {
+							showModalDialog("Error",
+									"Unknown response from server");
+						}
+					}).fail(function() {
+				showModalDialog("Error", "Could not connect to server");
+			});
+
+			return false;
+		}
+
+		function showModalDialog(title, message) {
+			$("#modalTitle").text(title);
+			$("#modalBody").text(message);
+			$("#modalDialog").modal();
+		}
 	</script>
 </body>
 </html>

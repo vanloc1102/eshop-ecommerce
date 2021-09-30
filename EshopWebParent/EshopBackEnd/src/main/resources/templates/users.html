@@ -7,7 +7,9 @@
 <title>Eshop Admin Dashboard</title>
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet"
-	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+	th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" />
+<link rel="stylesheet" th:href="@{/fontawesomes/all.css}" />
+<link rel="stylesheet" th:href="@{/css/style.css}" />
 <!-- jQuery library -->
 <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
 <!-- Popper JS -->
@@ -57,9 +59,8 @@
 			<h2>Manage Users</h2>
 			<a th:href="@{/users/new}">Create New User</a>
 		</div>
-		<div th:if="${message != null}" class="alert alert-success text-center">
-			[[${message}]]
-		</div>
+		<div th:if="${message != null}"
+			class="alert alert-success text-center">[[${message}]]</div>
 		<div class="table-responsive-xl">
 			<table class="table table-hover">
 				<caption>List of users</caption>
@@ -78,13 +79,18 @@
 				<tbody>
 					<tr th:each="user : ${listAllUsers}">
 						<th scope="row">[[${user.id}]]</th>
-						<td></td>
+						<td><span class="fas fa-user-secret fa-2x text-secondary"></span]></td>
 						<td>[[${user.email}]]</td>
 						<td>[[${user.firstName}]]</td>
 						<td>[[${user.lastName}]]</td>
 						<td>[[${user.roles}]]</td>
-						<td>[[${user.enable}]]</td>
-						<td>Edit &nbsp; Delete</td>
+						<td><a th:if="${user.enable == true}" th:href="@{/}"
+							class="fas fa-check-circle text-primary"></a> <a
+							th:if="${user.enable == false}" th:href="@{/}"
+							class="fas fa-check-circle text-dark"></a></td>
+						<td><a th:href="@{'/users/edit/' + ${user.id}}"
+							class="fas fa-edit text-success" title="Edit this user"></a>
+							&nbsp; <a th:href="@{/}" class="fas fa-trash-alt text-danger"></a></td>
 					</tr>
 				</tbody>
 			</table>

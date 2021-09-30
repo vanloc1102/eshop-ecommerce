@@ -1,0 +1,13 @@
+@charset "ISO-8859-1";
+
+.icon-silver {
+	color: silver;
+}
+
+td {
+	vertical-align: middle !important;
+}
+
+a:hover {
+	text-decoration: none;
+}
